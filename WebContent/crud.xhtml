@@ -1,0 +1,125 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:s="http://jboss.org/schema/seam/taglib"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:rich="http://richfaces.org/rich" 
+	xmlns:a4j="http://richfaces.org/a4j" 
+	template="layout/template.xhtml">
+
+	<ui:define name="body">
+		<h:form id="crudForm">
+			<a4j:region>
+				<rich:panel>
+					<f:facet name="header">Tela de Cadastro</f:facet>
+					<div class="dialog">
+						<h:panelGrid columns="3" rowClasses="prop"
+							columnClasses="name, value">
+							<h:outputLabel for="nome">Nome: </h:outputLabel>
+							<h:inputText id="nome" value="#{crud.pessoa.nome}" required="true" />
+							<rich:message for="nome"/>
+							
+							<h:outputLabel for="cpf">CPF: </h:outputLabel>
+							<h:inputText id="cpf" value="#{crud.pessoa.cpf}" required="true" />
+							<rich:message for="cpf"/>
+							
+							<h:outputLabel for="endereco">Endereço: </h:outputLabel>
+							<h:inputText id="endereco" value="#{crud.pessoa.endereco}" required="true" />
+							<rich:message for="cpf"/>
+						</h:panelGrid>
+					</div>
+				</rich:panel>
+				<div class="actionButtons">
+					<a4j:commandButton id="submit" value="Salvar" action="#{crud.salvarPessoa}" render="idListPessoas" />
+				</div>
+			</a4j:region>
+		</h:form>
+		<hr/>
+		<s:div id="idListPessoas">
+			<rich:panel rendered="#{not crud.pessoas.isEmpty()}">
+				<f:facet name="header">Lista de Pessoas</f:facet>
+				<rich:dataTable value="#{crud.pessoas}" var="p">
+					<rich:column>
+						<f:facet name="header">ID</f:facet>
+						<h:outputText value="#{p.id}" />
+					</rich:column>
+					<rich:column>
+						<f:facet name="header">NOME</f:facet>
+						<h:outputText value="#{p.nome}" />
+					</rich:column>
+					<rich:column>
+						<f:facet name="header">CPF</f:facet>
+						<h:outputText value="#{p.cpf}" />
+					</rich:column>
+					<rich:column>
+						<f:facet name="header">Endereço</f:facet>
+						<h:outputText value="#{p.endereco}" />
+					</rich:column>
+					<rich:column colspan="2">
+						<f:facet name="header">Ações</f:facet>
+						<a4j:region>
+							<a4j:region>
+								<a4j:commandLink value="Editar"
+									onclick="populaPessoaEdit(#{p.id});" style="margin-right: 5px;"/>
+		
+								<a4j:commandLink value="Remover"
+									actionListener="#{crud.configIdAux}"
+									onclick="#{rich:component('confirm')}.show();">
+									<f:attribute name="idPessoa" value="#{p.id}" />
+								</a4j:commandLink>
+							</a4j:region>
+						</a4j:region>
+					</rich:column>
+				</rich:dataTable>
+			</rich:panel>
+		</s:div>
+		
+		<a4j:jsFunction name="populaPessoaEdit" action="#{crud.popularPessoa(idPessoa)}" render="alteraPessoa" oncomplete="#{rich:component('alteraPessoa')}.show();">
+			<a4j:param name="idPessoa" assignTo="#{idPessoa}" ></a4j:param>
+		</a4j:jsFunction>
+
+		<a4j:region>
+	      <rich:popupPanel id="confirm" modal="true" moveable="false" width="250" height="150">
+	      	<f:facet name="header">Confirmação</f:facet>
+	      	
+	      	<h:panelGrid columns="2">
+	      		<h:graphicImage value="/img/msgwarn.png" />
+	      		<h:outputText value="Deseja mesmo remover essa pessoa?"/>
+	      	</h:panelGrid>
+	      	<h:panelGroup style="margin:45px;padding: 15px;">
+	      		<a4j:commandButton value="OK" action="#{crud.remover}" 
+	      			oncomplete="#{rich:component('confirm')}.hide();return false;" render="idListPessoas"/>
+	      		<a4j:commandButton value="Cancelar" onclick="#{rich:component('confirm')}.hide();return false;"/>
+	      	</h:panelGroup>
+	      </rich:popupPanel>
+      </a4j:region>
+      
+      <a4j:region>
+      	<h:form>
+	      <rich:popupPanel id="alteraPessoa" modal="true" moveable="false" width="350" height="150" domElementAttachment="form" >
+      		<f:facet name="header">Alteração de Pessoa</f:facet>
+       		<h:panelGrid columns="3">
+	      		<h:outputText value="Nome:"/>
+	      		<h:inputText value="#{crud.pessoaAux.nome}" required="true" id="nome"/>
+	      		<rich:messages for="nome" />
+	      		
+	      		<h:outputText value="CPF:"/>
+	      		<h:inputText value="#{crud.pessoaAux.cpf}" required="true" id="cpf"/>
+	      		<rich:messages for="cpf" />
+	      		
+	      		<h:outputText value="Endereço:"/>
+	      		<h:inputText value="#{crud.pessoaAux.endereco}" required="true" id="endereco"/>
+	      		<rich:messages for="endereco" />
+      		</h:panelGrid>
+      		<h:panelGroup >
+      			<a4j:commandButton value="Atualizar" action="#{crud.atualizar}" 
+      				oncomplete="if(#{facesContext.maximumSeverity.ordinal == 0}){#{rich:component('alteraPessoa')}.hide();return false;}" render="idListPessoas"/>
+      			<a4j:commandButton value="Cancelar" onclick="#{rich:component('alteraPessoa')}.hide();return false;"/>
+      		</h:panelGroup>
+      	  </rich:popupPanel>
+	    </h:form>
+      </a4j:region>
+	</ui:define>
+</ui:composition>
